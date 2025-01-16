@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Rockchip flash dumper script.
+# Requires the device to be in maskrom (with a loaded spl) or in recovery mode.
+#
+# This script is part of BredOS-Tools, licenced under the GPL-3.0 licence.
+# Bill Sideris <bill88t@bredos.org>
+
+show_help() {
+    echo "Usage: $0 <filename>"
+    echo ""
+    echo "Description:"
+    echo "  Dumps data from a device connected via rkdeveloptool to a specified file."
+    echo ""
+    echo "Arguments:"
+    echo "  <filename>   The name of the output file where the dump will be saved."
+    echo ""
+    echo "Example:"
+    echo "  $0 dump.img"
+    echo ""
+    echo "Requirements:"
+    echo "  - sudo privileges to run rkdeveloptool commands."
+    echo "  - rkdeveloptool must be installed and accessible in the PATH."
+}
+
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+    show_help
+    exit 0
+fi
+
+# Check if rkdeveloptool is installed
+if ! command -v rkdeveloptool &>/dev/null; then
+    echo "Error: rkdeveloptool is not installed or not in your PATH."
+    echo "Please install rkdeveloptool and try again."
+    exit 1
+fi
+
+# Set filename
+filename="$1"
+if [[ -z "$filename" ]]; then
+    echo "Error: Please provide a filename as an argument."
+    show_help
+    exit 1
+fi
+
+# Find size
+output=$(sudo rkdeveloptool rfi 2>/dev/null)
+sector_count=$(echo "$output" | grep -i "Sectors" | awk '{print $3}')
+if [[ -z "$sector_count" || ! "$sector_count" =~ ^[0-9]+$ ]]; then
+    echo "Error: Unable to extract a valid sector count from the output."
+    exit 1
+fi
+
+# Dump
+sudo rkdeveloptool rl 0 "$sector_count" "$filename"
+
+if [[ $? -eq 0 ]]; then
+    echo "Successfully dumped to $filename ($sector_count sectors)"
+else
+    echo "Error: Dump failed!"
+    exit 1
+fi
