@@ -1,0 +1,84 @@
+#!/bin/bash
+
+set -e  # Exit immediately if a command fails
+
+CHROOT_DIR="/mnt/chroot"
+BOOT_PATH="/boot/efi"
+
+# Help message
+usage() {
+  echo "Usage: $0 <btrfs_partition> <boot_partition>"
+  echo
+  echo "Example:"
+  echo "  $0 /dev/sdb3 /dev/sdb2"
+  echo
+  echo "Mounts the given Btrfs partition with subvolumes and the boot partition,"
+  echo "then chroots into the system. Cleans up after exiting chroot."
+  exit 1
+}
+
+# Ensure two arguments are provided
+if [[ $# -ne 2 ]]; then
+  echo "Error: Missing required arguments."
+  usage
+fi
+
+BTRFS_PART="$1"
+BOOT_PART="$2"
+
+# Check if devices exist
+for dev in "$BTRFS_PART" "$BOOT_PART"; do
+  if [[ ! -b "$dev" ]]; then
+    echo "Error: Device $dev does not exist."
+    exit 1
+  fi
+done
+
+echo "About to mount:"
+echo "  Btrfs partition: ${BTRFS_PART}"
+echo "    ├─ subvol=@     -> $CHROOT_DIR"
+echo "    ├─ subvol=@home -> $CHROOT_DIR/home"
+echo "    ├─ subvol=@log  -> $CHROOT_DIR/var/log"
+echo "    └─ subvol=@pkg  -> $CHROOT_DIR/var/cache/pacman/pkg"
+echo "  Boot partition: ${BOOT_PART} -> $CHROOT_DIR$BOOT_PATH"
+echo
+read -r -p "Proceed with mounting and chrooting? [y/N] " confirm
+[[ "$confirm" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 1; }
+
+# Check or create chroot directory
+if [[ -e "$CHROOT_DIR" ]]; then
+  if [[ ! -d "$CHROOT_DIR" ]]; then
+    echo "Error: $CHROOT_DIR exists but is not a directory."
+    exit 1
+  elif [[ -n "$(ls -A "$CHROOT_DIR")" ]]; then
+    echo "Error: $CHROOT_DIR is not empty."
+    exit 1
+  fi
+else
+  sudo mkdir -p "$CHROOT_DIR"
+fi
+
+# Mount Btrfs subvolumes
+sudo mount -t btrfs -o subvol=@ "$BTRFS_PART" "$CHROOT_DIR"
+sudo mount -t btrfs -o subvol=@home "$BTRFS_PART" "$CHROOT_DIR/home"
+sudo mount -t btrfs -o subvol=@log "$BTRFS_PART" "$CHROOT_DIR/var/log"
+sudo mount -t btrfs -o subvol=@pkg "$BTRFS_PART" "$CHROOT_DIR/var/cache/pacman/pkg"
+
+# Mount boot partition
+sudo mount -o rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro "$BOOT_PART" "$CHROOT_DIR$BOOT_PATH"
+
+# Enter chroot
+sudo arch-chroot "$CHROOT_DIR"
+
+# Unmount in reverse order
+echo "Unmounting..."
+sudo umount "$CHROOT_DIR$BOOT_PATH"
+sudo umount "$CHROOT_DIR/var/cache/pacman/pkg"
+sudo umount "$CHROOT_DIR/var/log"
+sudo umount "$CHROOT_DIR/home"
+sudo umount "$CHROOT_DIR"
+
+# Remove chroot directory
+sudo rmdir "$CHROOT_DIR" && echo "Removed $CHROOT_DIR"
+
+exit 0

@@ -8,13 +8,16 @@ arch=('any')
 url="https://github.com/BredOS/bredos-tools"
 license=('GPL3')
 depends=('python')
-source=('dtsc' 'rkdump' 'wakeupctl')
+source=('dtsc' 'rkdump' 'bredos-chroot' 'wakeupctl')
 sha256sums=('c8f84dae31981c8e847f99a1f303f2b6924f721c56b93f138c4cf550bc714040'
             '773f008c45af861666a1384f072b2ffb6d00427632dd80b5d83d7fa2f6a66915'
+            '7bcf7ea1368d48876ff0991754f0be13e1fddcc0ceeef111e51dfd5461ff4451'
             'debd19bb2b025df33eb6dbdea1863c6a95c92f9ad874633754e27cbda89f67f6')
+license=('Unknown')
 
 package() {
     install -Dm755 "$srcdir/dtsc" "$pkgdir/usr/bin/dtsc"
     install -Dm755 "$srcdir/rkdump" "$pkgdir/usr/bin/rkdump"
     install -Dm755 "$srcdir/wakeupctl" "$pkgdir/usr/bin/wakeupctl"
+    install -Dm755 "$srcdir/bredos-chroot" "$pkgdir/usr/bin/bredos-chroot"
 }
