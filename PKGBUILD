@@ -1,7 +1,7 @@
 # Maintainer: Bill Sideris <bill88t@bredos.org>
 
 pkgname=bredos-tools
-pkgver=1.2.3
+pkgver=1.3.0
 pkgrel=1
 pkgdesc="Scripts used for the development of BredOS"
 arch=('any')
@@ -9,11 +9,12 @@ url="https://github.com/BredOS/bredos-tools"
 license=('GPL3')
 depends=('python' 'arch-install-scripts')
 optdepends=('dtc: Compile device trees with the dtsc helper')
-source=('dtsc' 'rkdump' 'bredos-chroot' 'wakeupctl')
-sha256sums=('8bed1a9fb3a05deaa3f29cfa4fbf79f5ed04e8c3d297dcbaceb86405009ebf4b'
-            '2e3987479e1e4d8f0235c6e930ee9e01290c595d4fe42b0bcd0feac077d87172'
-            '7bcf7ea1368d48876ff0991754f0be13e1fddcc0ceeef111e51dfd5461ff4451'
-            'debd19bb2b025df33eb6dbdea1863c6a95c92f9ad874633754e27cbda89f67f6')
+source=('dtsc' 'rkdump' 'bredos-chroot' 'wakeupctl' 'grub-password')
+sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP')
 license=('Unknown')
 
 package() {
@@ -21,4 +22,5 @@ package() {
     install -Dm755 "$srcdir/rkdump" "$pkgdir/usr/bin/rkdump"
     install -Dm755 "$srcdir/wakeupctl" "$pkgdir/usr/bin/wakeupctl"
     install -Dm755 "$srcdir/bredos-chroot" "$pkgdir/usr/bin/bredos-chroot"
+    install -Dm755 "$srcdir/grub-password" "$pkgdir/usr/bin/grub-password"
 }
