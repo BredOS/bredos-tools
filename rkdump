@@ -52,7 +52,7 @@ if [[ -z "$sector_count" || ! "$sector_count" =~ ^[0-9]+$ ]]; then
 fi
 
 # Dump
-sudo rkdeveloptool rl 0 "$sector_count" "$filename"
+sudo rkdeveloptool rl 0 "$sector_count" "$filename" && sudo chown $UID:$UID $filename
 
 if [[ $? -eq 0 ]]; then
     echo "Successfully dumped to $filename ($sector_count sectors)"

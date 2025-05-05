@@ -71,7 +71,7 @@ def compile_dts(temp_file: str, output_file: str, include: str = None) -> bool:
     cmd = ["dtc"]
     if include is not None:
         cmd += ["-i", include]
-    cmd += ["-I", "dts", "-O", "dtb", temp_file, "-o", output_file]
+    cmd += ["-I", "dts", "-@", "-O", "dtb", temp_file, "-o", output_file]
     print("Compiling...")
     try:
         subprocess.run(cmd, check=True)
