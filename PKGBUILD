@@ -1,7 +1,7 @@
 # Maintainer: Bill Sideris <bill88t@bredos.org>
 
 pkgname=bredos-tools
-pkgver=1.4.1
+pkgver=1.4.2
 pkgrel=1
 pkgdesc="Scripts used for the development of BredOS"
 arch=('any')

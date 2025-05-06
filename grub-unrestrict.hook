@@ -7,4 +7,4 @@ Target = grub
 [Action]
 Description = Applying grub-unrestrict if a password is set..
 When = PostTransaction
-Exec = /usr/bin/bash -c '[[ -f /etc/grub.d/99-bredos-grub-password ]] && /usr/bin/grub-apply-unrestrict'
+Exec = /usr/bin/bash -c '[[ -f /etc/grub.d/99-bredos-grub-password ]] && /usr/bin/grub-apply-unrestrict || true'
