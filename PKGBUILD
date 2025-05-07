@@ -1,9 +1,9 @@
 # Maintainer: Bill Sideris <bill88t@bredos.org>
 
 pkgname=bredos-tools
-pkgver=1.4.2
+pkgver=1.5.0
 pkgrel=1
-pkgdesc="Scripts used for the development of BredOS"
+pkgdesc="A grand collection of tools"
 arch=('any')
 url="https://github.com/BredOS/bredos-tools"
 license=('GPL3')
