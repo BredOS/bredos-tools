@@ -1,0 +1,10 @@
+[Unit]
+Description=Sleep inhibitor daemon
+After=default.target
+
+[Service]
+ExecStart=/usr/bin/sleepctld
+Restart=always
+
+[Install]
+WantedBy=default.target

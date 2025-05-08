@@ -199,12 +199,12 @@ def main():
     elif args[0] in ["-m", "--monitor"]:
         monitor_wakeups((len(args) - 1) and (args[1] in ["-a", "--autodisable"]))
     elif args[0] in ["-d", "--disable"]:
-        if not len(args)-1:
+        if not len(args) - 1:
             print("No devices specified!")
         else:
             set_wakeup(args[2:], "disabled")
     elif args[0] in ["-e", "--enable"]:
-        if not len(args)-1:
+        if not len(args) - 1:
             print("No devices specified!")
         else:
             set_wakeup(args[2:], "enabled")

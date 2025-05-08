@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 """
-    This script is part of BredOS-Tools, licenced under the GPL-3.0 licence.
+This script is part of BredOS-Tools, licenced under the GPL-3.0 licence.
 
-    Bill Sideris <bill88t@bredos.org>
+Bill Sideris <bill88t@bredos.org>
 """
 
 import os
@@ -41,7 +41,7 @@ def preprocess_dts(input_file: str, temp_file: str, include: str, kernel: str) -
         "cpp",
         "-nostdinc",
         "-I",
-        os.path.join(linux_include_path, 'include'),
+        os.path.join(linux_include_path, "include"),
     ]
 
     if include is not None:

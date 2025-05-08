@@ -1,0 +1,28 @@
+#!/bin/bash
+
+CONFIG="$HOME/.config/sleepctl.conf"
+
+while true; do
+    mode="always"
+    processes=()
+
+    [[ -f "$CONFIG" ]] && source "$CONFIG"
+
+    if [[ "$mode" == "always" ]]; then
+        systemd-inhibit --what=sleep --why="sleepctl: always" sleep 10 &
+    elif [[ "$mode" == "lid" ]]; then
+        systemd-inhibit --what=handle-lid-switch:sleep --why="sleepctl: lid" sleep 10 &
+    elif [[ "$mode" == "processes" ]]; then
+        active=0
+        IFS=',' read -ra names <<< "$processes"
+        for proc in "${names[@]}"; do
+            if pgrep -x "$proc" >/dev/null; then
+                active=1
+                break
+            fi
+        done
+        [[ "$active" == 1 ]] && systemd-inhibit --what=sleep --why="sleepctl: processes" sleep 10 &
+    fi
+
+    sleep 7
+done
