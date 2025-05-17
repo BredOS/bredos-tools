@@ -1,0 +1,41 @@
+.TH BREDOS-CHROOT 1 "May 2025" "BredOS Tools" "BredOS System Administration"
+.SH NAME
+bredos-chroot \- chroot into a BredOS installation
+.SH SYNOPSIS
+.B bredos-chroot
+\fIBTRFS_PARTITION\fR \fIBOOT_PARTITION\fR
+.SH DESCRIPTION
+.B bredos-chroot
+is a utility that simplifies chrooting into a BredOS installation by
+automatically mounting the Btrfs subvolumes and boot partition. It is
+primarily used for system repairs, updates, or maintenance of an existing
+BredOS installation from a live environment.
+.SH ARGUMENTS
+.TP
+.BR BTRFS_PARTITION
+The Btrfs partition containing the BredOS system (e.g., /dev/sda3)
+.TP
+.BR BOOT_PARTITION
+The boot partition containing the EFI files (e.g., /dev/sda2)
+.SH OPERATION
+The tool performs the following operations:
+.PP
+.RS 4
+1. Mounts the specified Btrfs partition with standard BredOS subvolumes (@, @home, @log, @pkg)
+.br
+2. Mounts the boot partition
+.br
+3. Chroots into the system
+.br
+4. After exiting the chroot, automatically unmounts everything
+.RE
+.SH EXAMPLES
+.PP
+.B bredos-chroot /dev/sdb3 /dev/sdb2
+.SH SEE ALSO
+.BR arch-chroot (8),
+.BR mount (8)
+.SH BUGS
+Report bugs to the BredOS tools issue tracker at https://github.com/BredOS/bredos-tools/issues
+.SH AUTHOR
+Bill88t <bill88t@feline.gr>

@@ -1,0 +1,42 @@
+.TH RKDUMP 1 "May 2025" "BredOS Tools" "User Commands"
+.SH NAME
+rkdump \- utility for dumping data from Rockchip devices
+.SH SYNOPSIS
+.B rkdump
+\fIFILENAME\fR
+.br
+.B rkdump
+[-h|--help]
+.SH DESCRIPTION
+.B rkdump
+is a tool for dumping data from Rockchip devices connected via rkdeveloptool.
+It requires the device to be in maskrom (with a loaded SPL) or in recovery mode.
+.SH OPTIONS
+.TP
+.BR \-h ", " \-\-help
+Display help information and exit.
+.TP
+.BR \fIFILENAME\fR
+The name of the output file where the dump will be saved.
+.SH EXAMPLES
+.PP
+To dump data to a file:
+.PP
+.B rkdump dump.img
+.PP
+To display help information:
+.PP
+.B rkdump --help
+.SH REQUIREMENTS
+.PP
+.RS 4
+- sudo privileges to run rkdeveloptool commands
+.br
+- rkdeveloptool must be installed and accessible in the PATH
+.RE
+.SH SEE ALSO
+.BR dtsc (1)
+.SH BUGS
+Report bugs to the BredOS tools issue tracker at https://github.com/BredOS/bredos-tools/issues
+.SH AUTHOR
+Bill88t <bill88t@feline.gr>

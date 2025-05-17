@@ -1,0 +1,34 @@
+.TH SLEEPCTLD 1 "May 2025" "BredOS Tools" "User Commands"
+.SH NAME
+sleepctld \- daemon for sleep inhibition control
+.SH SYNOPSIS
+.B sleepctld
+.SH DESCRIPTION
+.B sleepctld
+is the daemon component of the sleepctl utility. It runs in the background
+and enforces the sleep inhibition rules configured by sleepctl. This daemon
+is typically managed through systemd user services and should not be started
+directly.
+.PP
+The daemon reads configuration from ~/.config/sleepctl.conf and creates
+appropriate systemd inhibitors based on the configured mode:
+.TP
+.BR always
+Unconditionally inhibits system sleep
+.TP
+.BR lid
+Inhibits sleep initiated by lid switch events
+.TP
+.BR processes
+Inhibits sleep when specified processes are running
+.SH FILES
+.TP
+.I ~/.config/sleepctl.conf
+Configuration file read by the daemon
+.SH SEE ALSO
+.BR sleepctl (1),
+.BR systemd-inhibit (1)
+.SH BUGS
+Report bugs to the BredOS tools issue tracker at https://github.com/BredOS/bredos-tools/issues
+.SH AUTHOR
+Bill88t <bill88t@feline.gr>

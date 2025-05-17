@@ -1,0 +1,42 @@
+.TH DTSC 1 "May 2025" "BredOS Tools" "User Commands"
+.SH NAME
+dtsc \- Device Tree Source Compiler helper
+.SH SYNOPSIS
+.B dtsc
+[\fIOPTIONS\fR] \fIINPUT_FILE\fR
+.SH DESCRIPTION
+.B dtsc
+is a utility that simplifies compiling Device Tree Source (.dts) files into
+Device Tree Blob (.dtb or .dtbo) format by handling preprocessing and compilation
+steps.
+.SH OPTIONS
+.TP
+.BR \-o ", " \-\-output " " \fIFILE\fR
+Specify output file (default: makes input_filename.dtb)
+.TP
+.BR \-i ", " \-\-include " " \fIDIRECTORY\fR
+Source of additional device tree files (optional)
+.TP
+.BR \-k ", " \-\-kernel " " \fIDIRECTORY\fR
+Manually specify a kernel source path (default: autodetect)
+.SH EXAMPLES
+.PP
+Compile a device tree source file with default options:
+.PP
+.B dtsc my_device_tree.dts
+.PP
+Compile with a specific output name:
+.PP
+.B dtsc my_device_tree.dts \-o my_output.dtbo
+.PP
+Compile with additional include directory:
+.PP
+.B dtsc my_device_tree.dts \-i /path/to/includes
+.SH REQUIREMENTS
+Requires the Device Tree Compiler (dtc) to be installed.
+.SH SEE ALSO
+.BR dtc (1)
+.SH BUGS
+Report bugs to the BredOS tools issue tracker at https://github.com/BredOS/bredos-tools/issues
+.SH AUTHOR
+Bill88t <bill88t@feline.gr>

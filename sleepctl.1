@@ -1,0 +1,63 @@
+.TH SLEEPCTL 1 "May 2025" "BredOS Tools" "User Commands"
+.SH NAME
+sleepctl \- control system suspend behavior
+.SH SYNOPSIS
+.B sleepctl
+[\fIOPTIONS\fR]
+.SH DESCRIPTION
+.B sleepctl
+is a utility that allows users to control the system suspend behavior by
+inhibiting sleep under various conditions. It runs as a user service and
+can be configured to prevent sleep always, only when the lid is closed,
+or when specific processes are running.
+.SH OPTIONS
+.TP
+.BR \-e ", " \-\-enable
+Enable and start the inhibitor service
+.TP
+.BR \-d ", " \-\-disable
+Stop and disable the inhibitor service
+.TP
+.BR \-s ", " \-\-status
+Show systemd user service status
+.TP
+.BR \-t ", " \-\-toggle
+Toggle the service state (enable if disabled, disable if enabled)
+.TP
+.BR \-m ", " \-\-mode " " \fIMODE\fR [\fIPROCS\fR]
+Set inhibition mode:
+.RS
+.TP
+.BR always
+Always prevent the system from sleeping
+.TP
+.BR lid
+Only prevent sleeping when initiated by lid close
+.TP
+.BR processes " " \fIPROC1,PROC2,...\fR
+Prevent sleeping when any listed process is running
+.RE
+.SH FILES
+.TP
+.I ~/.config/sleepctl.conf
+Configuration file storing current mode and process list
+.SH EXAMPLES
+.PP
+To enable the inhibitor:
+.PP
+.B sleepctl \-\-enable
+.PP
+To set the mode to always prevent sleeping:
+.PP
+.B sleepctl \-\-mode always
+.PP
+To prevent sleep when Firefox or VLC are running:
+.PP
+.B sleepctl \-\-mode processes firefox,vlc
+.SH SEE ALSO
+.BR sleepctld (1),
+.BR systemd-inhibit (1)
+.SH BUGS
+Report bugs to the BredOS tools issue tracker at https://github.com/BredOS/bredos-tools/issues
+.SH AUTHOR
+Bill88t <bill88t@feline.gr>
