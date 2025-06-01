@@ -9,7 +9,7 @@ CONFIG_PATH = Path.home() / ".config/sleepctl.conf"
 SERVICE_NAME = "sleepctl.service"
 
 
-def write_config(mode, processes):
+def write_config(mode, processes) -> None:
     CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(CONFIG_PATH, "w") as f:
         f.write(f"mode={mode}\n")
@@ -17,11 +17,11 @@ def write_config(mode, processes):
             f.write(f"processes={','.join(processes)}\n")
 
 
-def read_status():
+def read_status() -> None:
     subprocess.run(["systemctl", "--user", "status", SERVICE_NAME])
 
 
-def systemctl_user(*args, capture=False):
+def systemctl_user(*args, capture=False) -> str | None:
     if capture:
         return subprocess.run(
             ["systemctl", "--user"] + list(args), capture_output=True, text=True
@@ -29,7 +29,7 @@ def systemctl_user(*args, capture=False):
     return subprocess.run(["systemctl", "--user"] + list(args))
 
 
-def toggle_service():
+def toggle_service() -> bool:
     enabled = systemctl_user("is-enabled", SERVICE_NAME, capture=True)
     if "enabled" in enabled.stdout:
         systemctl_user("disable", "--now", SERVICE_NAME)
@@ -40,7 +40,7 @@ def toggle_service():
         return True
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Suspend inhibitor (user slice)")
     parser.add_argument(
         "-e",

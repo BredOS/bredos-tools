@@ -92,7 +92,7 @@ def check_dependencies() -> None:
         sys.exit(1)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Compile a Device Tree Source (DTS) file into a Device Tree Blob (DTBO or DTB).",
         epilog="Example: ./compile_dts.py my_device_tree.dts -o output.dtbo",

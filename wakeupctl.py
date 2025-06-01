@@ -12,7 +12,7 @@ class colors:
     green_t = "\033[32m"
 
 
-def find_power_wakeups():
+def find_power_wakeups() -> list:
     power_paths = list(Path("/sys").rglob("power/wakeup"))
     results = []
     for path in power_paths:
@@ -31,7 +31,7 @@ def find_power_wakeups():
     return results
 
 
-def find_acpi_wakeups():
+def find_acpi_wakeups() -> list:
     acpi_file = Path("/proc/acpi/wakeup")
     entries = []
     if not acpi_file.exists():
@@ -45,7 +45,7 @@ def find_acpi_wakeups():
     return entries
 
 
-def find_rtc_wakeups():
+def find_rtc_wakeups() -> list:
     rtc_path = Path("/proc/driver/rtc")
     if not rtc_path.exists():
         return []
@@ -56,7 +56,7 @@ def find_rtc_wakeups():
     ]
 
 
-def find_wol_wakeups():
+def find_wol_wakeups() -> list:
     results = []
     try:
         links = Path("/sys/class/net").iterdir()
@@ -82,7 +82,7 @@ def find_wol_wakeups():
     return results
 
 
-def pf(name: str, state: str, space: int):
+def pf(name: str, state: str, space: int) -> None:
     if name.endswith("/power"):
         name = name[:-6]
     print(
@@ -104,7 +104,7 @@ def get_wakeups() -> list:
     return wakeups + acpi + rtc + wol
 
 
-def list_wakeups():
+def list_wakeups() -> None:
     wakeups = find_power_wakeups()
     acpi = find_acpi_wakeups()
     rtc = find_rtc_wakeups()
@@ -155,7 +155,7 @@ def set_wakeup(targets: list, state: str) -> None:
                     print(f"{name}: failed to set -> {e}")
 
 
-def get_active_counts():
+def get_active_counts() -> dict:
     results = {}
     wakeups = get_wakeups()
 
@@ -173,7 +173,7 @@ def get_active_counts():
     return results
 
 
-def monitor_wakeups(disable: False):
+def monitor_wakeups(disable: False) -> None:
     print("== Monitoring enabled wakeup event counts.\n== Ctrl+C to exit.\n")
     prev = get_active_counts()
     try:
@@ -190,7 +190,7 @@ def monitor_wakeups(disable: False):
         print("\r\033[K\n" + ("-" * 8) + "\nMonitoring finished")
 
 
-def main():
+def main() -> None:
     args = sys.argv[1:]
     print("BredOS Wakeup device trigger handler\n" + (36 * "-") + "\n")
     if not args:

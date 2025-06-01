@@ -1,28 +1,74 @@
 #!/bin/bash
+set -euo pipefail
 
 CONFIG="$HOME/.config/sleepctl.conf"
+INHIBIT_PID=""
+INHIBIT_REASON=""
+INHIBIT_WHAT=""
+
+start_inhibitor() {
+    local what="$1"
+    local why="$2"
+
+    if [[ "$INHIBIT_PID" != "" && -e "/proc/$INHIBIT_PID" ]]; then
+        # Already running with same args
+        if [[ "$INHIBIT_REASON" == "$why" && "$INHIBIT_WHAT" == "$what" ]]; then
+            return
+        fi
+        stop_inhibitor
+    fi
+
+    systemd-inhibit --what="$what" --who="sleepctld" --why="$why" sleep infinity &
+    INHIBIT_PID=$!
+    INHIBIT_REASON="$why"
+    INHIBIT_WHAT="$what"
+    echo "Inhibitor started (PID=$INHIBIT_PID): $why [$what]"
+}
+
+stop_inhibitor() {
+    if [[ "$INHIBIT_PID" != "" && -e "/proc/$INHIBIT_PID" ]]; then
+        kill "$INHIBIT_PID" 2>/dev/null || true
+        wait "$INHIBIT_PID" 2>/dev/null || true
+        echo "Inhibitor stopped (PID=$INHIBIT_PID)"
+    fi
+    INHIBIT_PID=""
+    INHIBIT_REASON=""
+    INHIBIT_WHAT=""
+}
 
 while true; do
     mode="always"
-    processes=()
+    processes=""
 
     [[ -f "$CONFIG" ]] && source "$CONFIG"
 
-    if [[ "$mode" == "always" ]]; then
-        systemd-inhibit --what=sleep --why="sleepctl: always" sleep 10 &
-    elif [[ "$mode" == "lid" ]]; then
-        systemd-inhibit --what=handle-lid-switch:sleep --why="sleepctl: lid" sleep 10 &
-    elif [[ "$mode" == "processes" ]]; then
-        active=0
-        IFS=',' read -ra names <<< "$processes"
-        for proc in "${names[@]}"; do
-            if pgrep -x "$proc" >/dev/null; then
-                active=1
-                break
+    case "$mode" in
+        always)
+            start_inhibitor "handle-lid-switch:handle-power-key:handle-suspend-key:idle:sleep" "Rule: Always"
+            ;;
+        lid)
+            start_inhibitor "handle-lid-switch:sleep" "Rule: Lid"
+            ;;
+        processes)
+            IFS=',' read -ra procs <<< "$processes"
+            active=0
+            for proc in "${procs[@]}"; do
+                if pgrep -x "$proc" >/dev/null; then
+                    active=1
+                    break
+                fi
+            done
+            if [[ "$active" == 1 ]]; then
+                start_inhibitor "handle-lid-switch:handle-power-key:handle-suspend-key:idle:sleep" "Rule: Processes"
+            else
+                stop_inhibitor
             fi
-        done
-        [[ "$active" == 1 ]] && systemd-inhibit --what=sleep --why="sleepctl: processes" sleep 10 &
-    fi
+            ;;
+        *)
+            echo "Unknown mode '$mode'" >&2
+            stop_inhibitor
+            ;;
+    esac
 
-    sleep 7
+    sleep 5
 done
