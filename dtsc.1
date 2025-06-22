@@ -1,4 +1,4 @@
-.TH DTSC 1 "May 2025" "BredOS Tools" "User Commands"
+.TH DTSC 1 "Jun 2025" "BredOS Tools" "User Commands"
 .SH NAME
 dtsc \- Device Tree Source Compiler helper
 .SH SYNOPSIS
@@ -6,37 +6,55 @@ dtsc \- Device Tree Source Compiler helper
 [\fIOPTIONS\fR] \fIINPUT_FILE\fR
 .SH DESCRIPTION
 .B dtsc
-is a utility that simplifies compiling Device Tree Source (.dts) files into
-Device Tree Blob (.dtb or .dtbo) format by handling preprocessing and compilation
-steps.
+is a utility that simplifies the (de)compilation of Device Tree Source (.dts) and Blob (.dtb/.dtbo) files. It supports:
+.IP \[bu] 2
+Decompiling .dtb/.dtbo files to .dts
+.IP \[bu] 2
+Compiling .dts to .dtb or .dtbo, with preprocessing support
+.IP \[bu] 2
+Dumping and decompiling the live system device tree from /proc/device-tree
+
+The tool automatically detects kernel headers or allows manual override, and ensures required tools are present before operation.
 .SH OPTIONS
 .TP
 .BR \-o ", " \-\-output " " \fIFILE\fR
-Specify output file (default: makes input_filename.dtb)
+Specify output file (default: same name with swapped extension)
 .TP
 .BR \-i ", " \-\-include " " \fIDIRECTORY\fR
-Source of additional device tree files (optional)
+Specify additional include directory for DTS preprocessing (optional)
 .TP
 .BR \-k ", " \-\-kernel " " \fIDIRECTORY\fR
-Manually specify a kernel source path (default: autodetect)
+Manually specify a kernel source path for include headers (default: autodetect under /usr/src)
+.SH SPECIAL INPUT
+.TP
+.B system
+Using the literal input
+.B system
+dumps and decompiles the live-running device tree from
+.I /proc/device-tree
 .SH EXAMPLES
 .PP
-Compile a device tree source file with default options:
+Compile a device tree source file:
 .PP
 .B dtsc my_device_tree.dts
 .PP
-Compile with a specific output name:
+Compile with a specific output file:
 .PP
 .B dtsc my_device_tree.dts \-o my_output.dtbo
 .PP
-Compile with additional include directory:
+Compile with additional includes:
 .PP
 .B dtsc my_device_tree.dts \-i /path/to/includes
+.PP
+Dump the system's live device tree:
+.PP
+.B dtsc system \-o system.dts
 .SH REQUIREMENTS
-Requires the Device Tree Compiler (dtc) to be installed.
+Requires the Device Tree Compiler (\fBdtc\fR) and C Preprocessor (\fBcpp\fR).
 .SH SEE ALSO
-.BR dtc (1)
+.BR dtc (1),
+.BR cpp (1)
 .SH BUGS
 Report bugs to the BredOS tools issue tracker at https://github.com/BredOS/bredos-tools/issues
 .SH AUTHOR
-Bill88t <bill88t@feline.gr>
+Bill Sideris <bill88t@bredos.org>
