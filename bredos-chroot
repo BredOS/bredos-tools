@@ -3,7 +3,6 @@
 set -e  # Exit immediately if a command fails
 
 CHROOT_DIR="/mnt/chroot"
-BOOT_PATH="/boot/efi"
 
 # Help message
 usage() {
@@ -34,18 +33,15 @@ for dev in "$BTRFS_PART" "$BOOT_PART"; do
   fi
 done
 
-echo "About to mount:"
-echo "  Btrfs partition: ${BTRFS_PART}"
-echo "    ├─ subvol=@     -> $CHROOT_DIR"
-echo "    ├─ subvol=@home -> $CHROOT_DIR/home"
-echo "    ├─ subvol=@log  -> $CHROOT_DIR/var/log"
-echo "    └─ subvol=@pkg  -> $CHROOT_DIR/var/cache/pacman/pkg"
-echo "  Boot partition: ${BOOT_PART} -> $CHROOT_DIR$BOOT_PATH"
+# Preview
+echo " Btrfs partition: ${BTRFS_PART}"
+echo "   └─ subvol=@     -> $CHROOT_DIR"
+echo "(Other subvolumes and boot will be mounted after root is checked)"
 echo
-read -r -p "Proceed with mounting and chrooting? [y/N] " confirm
+read -r -p "Proceed with initial root mount? [y/N] " confirm
 [[ "$confirm" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 1; }
 
-# Check or create chroot directory
+# Create chroot directory if needed
 if [[ -e "$CHROOT_DIR" ]]; then
   if [[ ! -d "$CHROOT_DIR" ]]; then
     echo "Error: $CHROOT_DIR exists but is not a directory."
@@ -58,27 +54,61 @@ else
   sudo mkdir -p "$CHROOT_DIR"
 fi
 
-# Mount Btrfs subvolumes
+# Mount root subvolume only
 sudo mount -t btrfs -o subvol=@ "$BTRFS_PART" "$CHROOT_DIR"
+
+# Determine boot path
+if [[ -d "$CHROOT_DIR/boot/efi" ]]; then
+  BOOT_PATH="$CHROOT_DIR/boot/efi"
+elif [[ -d "$CHROOT_DIR/boot" ]]; then
+  BOOT_PATH="$CHROOT_DIR/boot"
+else
+  echo "No /boot or /boot/efi found in root subvolume."
+  read -r -p "Create and use /boot/efi? [y/N] " mkboot
+  if [[ "$mkboot" =~ ^[Yy]$ ]]; then
+    sudo mkdir -p "$CHROOT_DIR/boot/efi"
+    BOOT_PATH="$CHROOT_DIR/boot/efi"
+  else
+    BOOT_PATH=""
+  fi
+fi
+
+# Prompt to continue full mount
+echo
+echo " Ready to mount: ${BTRFS_PART}"
+echo "   ├─ subvol=@home -> $CHROOT_DIR/home"
+echo "   ├─ subvol=@log  -> $CHROOT_DIR/var/log"
+echo "   └─ subvol=@pkg  -> $CHROOT_DIR/var/cache/pacman/pkg"
+[[ -n "$BOOT_PATH" ]] && (
+    echo " Boot partition:" && \
+    echo "   └─ ${BOOT_PART} -> ${BOOT_PATH}"
+)
+read -r -p "Continue? [y/N] " do_mount
+if ! [[ "$do_mount" =~ ^[Yy]$ ]]; then
+  echo "Aborted. Unmounting root subvolume."
+  sudo umount "$CHROOT_DIR"
+  [[ -z "$(ls -A "$CHROOT_DIR" 2>/dev/null)" ]] && sudo rmdir "$CHROOT_DIR"
+  exit 0
+fi
+
+# Mount the rest
 sudo mount -t btrfs -o subvol=@home "$BTRFS_PART" "$CHROOT_DIR/home"
 sudo mount -t btrfs -o subvol=@log "$BTRFS_PART" "$CHROOT_DIR/var/log"
 sudo mount -t btrfs -o subvol=@pkg "$BTRFS_PART" "$CHROOT_DIR/var/cache/pacman/pkg"
-
-# Mount boot partition
-sudo mount -o rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro "$BOOT_PART" "$CHROOT_DIR$BOOT_PATH"
+[[ -n "$BOOT_PATH" ]] && sudo mount "$BOOT_PART" "$BOOT_PATH"
 
 # Enter chroot
 sudo arch-chroot "$CHROOT_DIR"
 
 # Unmount in reverse order
 echo "Unmounting..."
-sudo umount "$CHROOT_DIR$BOOT_PATH"
+[[ -n "$BOOT_PATH" ]] && sudo umount "$BOOT_PATH"
 sudo umount "$CHROOT_DIR/var/cache/pacman/pkg"
 sudo umount "$CHROOT_DIR/var/log"
 sudo umount "$CHROOT_DIR/home"
 sudo umount "$CHROOT_DIR"
 
-# Remove chroot directory
-sudo rmdir "$CHROOT_DIR" && echo "Removed $CHROOT_DIR"
+# Clean up
+[[ -z "$(ls -A "$CHROOT_DIR" 2>/dev/null)" ]] && sudo rmdir "$CHROOT_DIR" && echo "Removed $CHROOT_DIR"
 
 exit 0

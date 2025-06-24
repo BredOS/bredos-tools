@@ -1,7 +1,7 @@
 # Maintainer: Bill Sideris <bill88t@bredos.org>
 
 pkgname=bredos-tools
-pkgver=1.7.0
+pkgver=1.8.0
 pkgrel=1
 pkgdesc="A grand collection of tools"
 
