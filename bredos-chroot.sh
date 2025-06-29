@@ -3,18 +3,45 @@
 set -e  # Exit immediately if a command fails
 
 CHROOT_DIR="/mnt/chroot"
+NO_CONFIRM=0
+AUTO_EJECT=0
 
 # Help message
 usage() {
-  echo "Usage: $0 <btrfs_partition> <boot_partition>"
+  echo "Usage: $0 [--noconfirm] [--eject] <btrfs_partition> <boot_partition>"
   echo
   echo "Example:"
   echo "  $0 /dev/sdb3 /dev/sdb2"
   echo
-  echo "Mounts the given Btrfs partition with subvolumes and the boot partition,"
-  echo "then chroots into the system. Cleans up after exiting chroot."
+  echo "Options:"
+  echo "  --noconfirm, -c, --no-confirm  Suppress prompts, but wait with info"
+  echo "  --eject, -e                    Automatically eject device after chroot"
   exit 1
 }
+
+# Parse flags
+POSITIONAL=()
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --noconfirm|--no-confirm|-c)
+      NO_CONFIRM=1
+      shift
+      ;;
+    --eject|-e)
+      AUTO_EJECT=1
+      shift
+      ;;
+    -*)
+      echo "Unknown option: $1"
+      usage
+      ;;
+    *)
+      POSITIONAL+=("$1")
+      shift
+      ;;
+  esac
+done
+set -- "${POSITIONAL[@]}"
 
 # Ensure two arguments are provided
 if [[ $# -ne 2 ]]; then
@@ -24,6 +51,8 @@ fi
 
 BTRFS_PART="$1"
 BOOT_PART="$2"
+BASE_DEV=$(lsblk -no pkname "$BTRFS_PART" | head -n1)
+BASE_DEV="/dev/${BASE_DEV}"
 
 # Check if devices exist
 for dev in "$BTRFS_PART" "$BOOT_PART"; do
@@ -38,8 +67,14 @@ echo " Btrfs partition: ${BTRFS_PART}"
 echo "   └─ subvol=@     -> $CHROOT_DIR"
 echo "(Other subvolumes and boot will be mounted after root is checked)"
 echo
-read -r -p "Proceed with initial root mount? [y/N] " confirm
-[[ "$confirm" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 1; }
+
+if [[ $NO_CONFIRM -eq 0 ]]; then
+  read -r -p "Proceed with initial root mount? [y/N] " confirm
+  [[ "$confirm" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 1; }
+else
+  echo "[--noconfirm] Proceeding with initial root mount..."
+  sleep 1
+fi
 
 # Create chroot directory if needed
 if [[ -e "$CHROOT_DIR" ]]; then
@@ -64,12 +99,16 @@ elif [[ -d "$CHROOT_DIR/boot" ]]; then
   BOOT_PATH="$CHROOT_DIR/boot"
 else
   echo "No /boot or /boot/efi found in root subvolume."
-  read -r -p "Create and use /boot/efi? [y/N] " mkboot
-  if [[ "$mkboot" =~ ^[Yy]$ ]]; then
+  if [[ $NO_CONFIRM -eq 0 ]]; then
+    read -r -p "Create and use /boot/efi? [y/N] " mkboot
+    if [[ "$mkboot" =~ ^[Yy]$ ]]; then
+      sudo mkdir -p "$CHROOT_DIR/boot/efi"
+      BOOT_PATH="$CHROOT_DIR/boot/efi"
+    fi
+  else
+    echo "[--noconfirm] Creating /boot/efi"
     sudo mkdir -p "$CHROOT_DIR/boot/efi"
     BOOT_PATH="$CHROOT_DIR/boot/efi"
-  else
-    BOOT_PATH=""
   fi
 fi
 
@@ -83,12 +122,18 @@ echo "   └─ subvol=@pkg  -> $CHROOT_DIR/var/cache/pacman/pkg"
     echo " Boot partition:" && \
     echo "   └─ ${BOOT_PART} -> ${BOOT_PATH}"
 )
-read -r -p "Continue? [y/N] " do_mount
-if ! [[ "$do_mount" =~ ^[Yy]$ ]]; then
-  echo "Aborted. Unmounting root subvolume."
-  sudo umount "$CHROOT_DIR"
-  [[ -z "$(ls -A "$CHROOT_DIR" 2>/dev/null)" ]] && sudo rmdir "$CHROOT_DIR"
-  exit 0
+
+if [[ $NO_CONFIRM -eq 0 ]]; then
+  read -r -p "Continue? [y/N] " do_mount
+  if ! [[ "$do_mount" =~ ^[Yy]$ ]]; then
+    echo "Aborted. Unmounting root subvolume."
+    sudo umount "$CHROOT_DIR"
+    [[ -z "$(ls -A "$CHROOT_DIR" 2>/dev/null)" ]] && sudo rmdir "$CHROOT_DIR"
+    exit 0
+  fi
+else
+  echo "[--noconfirm] Continuing with mount..."
+  sleep 1
 fi
 
 # Mount the rest
@@ -110,5 +155,16 @@ sudo umount "$CHROOT_DIR"
 
 # Clean up
 [[ -z "$(ls -A "$CHROOT_DIR" 2>/dev/null)" ]] && sudo rmdir "$CHROOT_DIR" && echo "Removed $CHROOT_DIR"
+
+# Ask if user wants to eject
+if [[ $AUTO_EJECT -eq 1 ]]; then
+  echo "[--eject] Ejecting $BASE_DEV"
+  sudo eject "$BASE_DEV" || echo "Warning: Failed to eject $BASE_DEV"
+elif [[ $NO_CONFIRM -eq 0 ]]; then
+  read -r -p "Eject base device $BASE_DEV? [y/N] " eject_ans
+  if [[ "$eject_ans" =~ ^[Yy]$ ]]; then
+    sudo eject "$BASE_DEV" || echo "Warning: Failed to eject $BASE_DEV"
+  fi
+fi
 
 exit 0

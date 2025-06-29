@@ -1,7 +1,7 @@
 # Maintainer: Bill Sideris <bill88t@bredos.org>
 
 pkgname=bredos-tools
-pkgver=1.8.0
+pkgver=1.10.0
 pkgrel=1
 pkgdesc="A grand collection of tools"
 
@@ -14,10 +14,11 @@ depends=('python' 'arch-install-scripts' 'systemd' 'gcc')
 optdepends=('dtc: Compile device trees with the dtsc helper')
 
 source=('dtsc.py'
-        'rkdump'
-        'bredos-chroot'
+        'rkdump.sh'
+        'bredos-chroot.sh'
+        'lsmmc.py'
         'wakeupctl.py'
-        'grub-password'
+        'grub-password.sh'
         'grub-apply-unrestrict.py'
         'grub-unrestrict.hook'
         'sleepctl.py'
@@ -32,7 +33,8 @@ source=('dtsc.py'
         'bredos-chroot.8')
 sha256sums=('f264899c639e3e8897e2daaef00a035a85ab51e39ba9ae5bb32d31e41d5394eb'
             'b3a3fd7115f63180d466b05739b092912c8b62420e514f39cb36b2b345c11585'
-            'ef2bf1beacf94d70b017124a3fb85adba406ae99fad62445fc9396452a54bbe1'
+            '3f8adbb46b4d0345ad558393ab66b4fa50d33c5761b742a513cf7aff803a94ee'
+            '7fa338e127e816acf5fb6c04e47c8a6098a606929b3e068853281a00d85005e2'
             '12047c25a46a9e0def5cc687ed0d1690d8e80853680280d347b1102b5203bde3'
             'be81b089e5bb91a9a3c2ae6c6658d538ea2b031263e3ac9685be2c1ec87fba6f'
             'f430e73417126b2dcf84cfaa02b3fb5c520da5794faf8d29f9c8531ec970614e'
@@ -53,16 +55,19 @@ package() {
     install -Dm755 "$srcdir/dtsc.py" "$pkgdir/usr/bin/dtsc"
 
     # RKDUMP
-    install -Dm755 "$srcdir/rkdump" "$pkgdir/usr/bin/rkdump"
+    install -Dm755 "$srcdir/rkdump.sh" "$pkgdir/usr/bin/rkdump"
 
     # Wakeupctl
     install -Dm755 "$srcdir/wakeupctl.py" "$pkgdir/usr/bin/wakeupctl"
 
     # BredOS-Chroot
-    install -Dm755 "$srcdir/bredos-chroot" "$pkgdir/usr/bin/bredos-chroot"
+    install -Dm755 "$srcdir/bredos-chroot.sh" "$pkgdir/usr/bin/bredos-chroot"
+
+    # lsmmc
+    install -Dm755 "$srcdir/lsmmc.py" "$pkgdir/usr/bin/lsmmc"
 
     # GRUB Password
-    install -Dm755 "$srcdir/grub-password" "$pkgdir/usr/bin/grub-password"
+    install -Dm755 "$srcdir/grub-password.sh" "$pkgdir/usr/bin/grub-password"
     install -Dm755 "$srcdir/grub-apply-unrestrict.py" "$pkgdir/usr/bin/grub-apply-unrestrict"
     install -Dm644 "$srcdir/grub-unrestrict.hook" "$pkgdir/usr/share/libalpm/hooks/grub-unrestrict.hook"
 
