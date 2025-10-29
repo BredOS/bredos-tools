@@ -1,7 +1,7 @@
 # Maintainer: Bill Sideris <bill88t@bredos.org>
 
 pkgname=bredos-tools
-pkgver=1.10.0
+pkgver=1.11.0
 pkgrel=1
 pkgdesc="A grand collection of tools"
 
@@ -22,7 +22,7 @@ source=('dtsc.py'
         'grub-apply-unrestrict.py'
         'grub-unrestrict.hook'
         'sleepctl.py'
-        'sleepctld'
+        'sleepctld.sh'
         'sleepctl.service'
         'rkdump.1'
         'grub-password.1'
@@ -39,8 +39,8 @@ sha256sums=('f264899c639e3e8897e2daaef00a035a85ab51e39ba9ae5bb32d31e41d5394eb'
             'be81b089e5bb91a9a3c2ae6c6658d538ea2b031263e3ac9685be2c1ec87fba6f'
             'f430e73417126b2dcf84cfaa02b3fb5c520da5794faf8d29f9c8531ec970614e'
             'ffabbfbfdca391f8616340a4323eddb868040ca35c24bd8d7d6c5df3b2cc77ac'
-            'b16aef713ffa13b9490b99a7919408671d7cbab1a109e1c5246367769711a6c8'
-            'fff6d0aa5a19bb9ab39d1696d228d2685956fbcad5cadf1817b2b2e73cb4e87f'
+            '797103948bd377f8aae15527eafcdb7e4d9121d4ce57ac7af0943bae26dbdca5'
+            '3c830af040906c5de9e4f82f7089775b585cd46eafc435053bef1aee717f8d49'
             '7bde0bb9eb48c7c560194d04a0864c833e63662d3ff527a23844eaa0d1849101'
             'ccaab9ca8f25571d5809b82f7be9a7133d91a75c745ff7174d5c78c593510659'
             '99646c23b88b74fa6fa9220588cb7cc18b1782fa8642559ce237adfc8b98ef01'
@@ -73,7 +73,7 @@ package() {
 
     # Sleepctl
     install -Dm755 "$srcdir/sleepctl.py" "$pkgdir/usr/bin/sleepctl"
-    install -Dm755 "$srcdir/sleepctld" "$pkgdir/usr/bin/sleepctld"
+    install -Dm755 "$srcdir/sleepctld.sh" "$pkgdir/usr/bin/sleepctld"
     install -Dm644 "$srcdir/sleepctl.service" "$pkgdir/usr/lib/systemd/user/sleepctl.service"
 
     # Manual pages

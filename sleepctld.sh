@@ -49,6 +49,9 @@ while true; do
         lid)
             start_inhibitor "handle-lid-switch:sleep" "Rule: Lid"
             ;;
+        button)
+            start_inhibitor "handle-power-key:handle-suspend-key:idle:sleep" "Rule: Power Button"
+            ;;
         processes)
             IFS=',' read -ra procs <<< "$processes"
             active=0

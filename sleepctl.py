@@ -66,7 +66,7 @@ def main() -> None:
         "--mode",
         nargs="+",
         metavar=("MODE", "PROCS"),
-        help="Set mode: always | lid | processes proc1,proc2,...",
+        help="Set mode: always | lid | button | processes proc1,proc2,...",
     )
 
     args = parser.parse_args()
@@ -83,7 +83,7 @@ def main() -> None:
         if len(args.mode) == 1:
             mode = args.mode[0]
             processes = []
-            if mode not in {"always", "lid"}:
+            if mode not in {"always", "lid", "button"}:
                 print(
                     "Error: '--mode processes' requires a process list.",
                     file=sys.stderr,
