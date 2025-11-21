@@ -1,7 +1,7 @@
 # Maintainer: Bill Sideris <bill88t@bredos.org>
 
 pkgname=bredos-tools
-pkgver=1.11.0
+pkgver=1.12.0
 pkgrel=1
 pkgdesc="A grand collection of tools"
 
@@ -11,7 +11,10 @@ license=('GPL3')
 
 groups=(bredos)
 depends=('python' 'arch-install-scripts' 'systemd' 'gcc')
-optdepends=('dtc: Compile device trees with the dtsc helper')
+optdepends=(
+    'dtc: Compile device trees with the dtsc helper'
+    'android-tools: Use the rv2rk script for flashing Ky RISC-V chips'
+)
 
 source=('dtsc.py'
         'rkdump.sh'
@@ -24,6 +27,9 @@ source=('dtsc.py'
         'sleepctl.py'
         'sleepctld.sh'
         'sleepctl.service'
+        'rv2rk.py'
+        'FSBL.bin'
+        'u-boot.itb'
         'rkdump.1'
         'grub-password.1'
         'dtsc.1'
@@ -42,6 +48,9 @@ sha256sums=('f264899c639e3e8897e2daaef00a035a85ab51e39ba9ae5bb32d31e41d5394eb'
             '797103948bd377f8aae15527eafcdb7e4d9121d4ce57ac7af0943bae26dbdca5'
             '3c830af040906c5de9e4f82f7089775b585cd46eafc435053bef1aee717f8d49'
             '7bde0bb9eb48c7c560194d04a0864c833e63662d3ff527a23844eaa0d1849101'
+            'adbcefef20db5743a34b75f463c73aefcfb86b16badc33f0edb30b947cb7ac0e'
+            '93a0b2e1b8181818ade215f00937db2decea79639147dcad2eb9faa8d669f4e4'
+            'fb163aa1ba382e2a6009c8e1b468494b5ab11aa80c500012590226f1fb554040'
             'ccaab9ca8f25571d5809b82f7be9a7133d91a75c745ff7174d5c78c593510659'
             '99646c23b88b74fa6fa9220588cb7cc18b1782fa8642559ce237adfc8b98ef01'
             '9a3d90776fb514bbcbfdb8cef0034555c093906eeac6509d3faa460fe04d7371'
@@ -75,6 +84,12 @@ package() {
     install -Dm755 "$srcdir/sleepctl.py" "$pkgdir/usr/bin/sleepctl"
     install -Dm755 "$srcdir/sleepctld.sh" "$pkgdir/usr/bin/sleepctld"
     install -Dm644 "$srcdir/sleepctl.service" "$pkgdir/usr/lib/systemd/user/sleepctl.service"
+
+    # rv2rk
+    install -Dm755 "$srcdir/rv2rk.py" "$pkgdir/usr/bin/rv2rk"
+    mkdir "$pkgdir/usr/share/rv2rk"
+    install -Dm644 "$srcdir/FSBL.bin" "$pkgdir/usr/share/rv2rk/FSBL.bin"
+    install -Dm644 "$srcdir/u-boot.itb" "$pkgdir/usr/share/rv2rk/u-boot.itb"
 
     # Manual pages
     install -Dm644 "$srcdir/rkdump.1" "$pkgdir/usr/share/man/man1/rkdump.1"
